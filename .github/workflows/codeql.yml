@@ -35,7 +35,7 @@ jobs:
             build-mode: manual
             runner: ubuntu-24.04
             timeout: 30
-            flutter-version: 3.47.x
+            flutter-version: 3.41.x
           - language: swift
             build-mode: manual
             runner: macos-26
@@ -60,8 +60,15 @@ jobs:
           channel: 'stable'
           cache: true
 
-      - name: Prepare Flutter project
-        if: matrix.language != 'actions'
+      - name: Prepare Android host project
+        if: matrix.language == 'java-kotlin'
+        run: |
+          flutter create --template=app --platforms=android codeql_android
+          cd codeql_android
+          dart pub add 'adyen_checkout:{"path":"../"}'
+
+      - name: Prepare iOS project
+        if: matrix.language == 'swift'
         working-directory: example
         run: |
           flutter clean
@@ -70,13 +77,6 @@ jobs:
       - name: Setup Gradle
         if: matrix.language == 'java-kotlin'
         uses: gradle/actions/setup-gradle@9c971963bec38e04b3d30dcc455b5382be2fdbfb
-        with:
-          gradle-version: '9.5.1'
-
-      - name: Initialize Gradle wrapper
-        if: matrix.language == 'java-kotlin'
-        working-directory: example/android
-        run: gradle wrapper
 
       - name: Install CocoaPods dependencies
         if: matrix.language == 'swift'
@@ -92,7 +92,7 @@ jobs:
 
       - name: Build Android plugin
         if: matrix.language == 'java-kotlin'
-        working-directory: example/android
+        working-directory: codeql_android/android
         run: |
           ./gradlew --no-daemon --no-build-cache \
             clean :adyen_checkout:assembleDebug
