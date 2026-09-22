@@ -66,6 +66,7 @@ jobs:
           flutter create --template=app --platforms=android codeql_android
           cd codeql_android
           dart pub add 'adyen_checkout:{"path":"../"}'
+          flutter pub get
 
       - name: Prepare iOS project
         if: matrix.language == 'swift'
